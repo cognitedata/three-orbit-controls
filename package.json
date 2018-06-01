@@ -1,6 +1,6 @@
 {
-  "name": "three-orbit-controls",
-  "version": "82.1.0",
+  "name": "@cognite/three-orbit-controls",
+  "version": "82.1.1",
   "description": "orbit controls for ThreeJS",
   "main": "index.js",
   "license": "MIT",
