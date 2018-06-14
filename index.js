@@ -76,6 +76,10 @@ module.exports = function( THREE ) {
 		// Mouse buttons
 		this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
 
+		// For dynamic target
+		this.enableMinDistToTarget = false;
+		this.minDistToTarget = 1;
+
 		// for reset
 		this.target0 = this.target.clone();
 		this.position0 = this.object.position.clone();
@@ -185,6 +189,20 @@ module.exports = function( THREE ) {
 				scale = 1;
 				panOffset.set( 0, 0, 0 );
 
+
+				if (this.enableMinDistToTarget) {
+
+					offset.copy( scope.target ).sub( position );
+					var distSqToTarget = offset.lengthSq();
+					if ( distSqToTarget < this.minDistToTarget * this.minDistToTarget ) {
+
+						offset.normalize().multiplyScalar(this.minDistToTarget);
+						scope.target.addVectors( position, offset );
+
+					}
+
+				}
+
 				// update condition is:
 				// min(camera displacement, camera rotation in radians)^2 > EPS
 				// using small-angle approximation cos(x/2) = 1 - x^2 / 8
@@ -242,6 +260,8 @@ module.exports = function( THREE ) {
 
 		var state = STATE.NONE;
 
+		this.getState = function() { return state; }
+
 		var EPS = 0.000001;
 
 		// current position in spherical coordinates
@@ -270,9 +290,22 @@ module.exports = function( THREE ) {
 
 		}
 
-		function getZoomScale() {
+		function getZoomScale( deltaY ) {
 
-			return Math.pow( 0.95, scope.zoomSpeed );
+			var absDeltaY = Math.abs(deltaY);
+			if (absDeltaY > 10) {
+
+				return Math.pow( 0.95, scope.zoomSpeed );
+
+			} else if (absDeltaY > 2) {
+
+				return Math.pow( 0.97, scope.zoomSpeed );
+
+			} else {
+
+				return Math.pow( 0.99, scope.zoomSpeed );
+
+			}
 
 		}
 
@@ -338,6 +371,7 @@ module.exports = function( THREE ) {
 					targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
 
 					// we actually don't use screenWidth, since perspective camera is fixed to screen height
+
 					panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
 					panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
 
@@ -460,11 +494,11 @@ module.exports = function( THREE ) {
 
 			if ( dollyDelta.y > 0 ) {
 
-				dollyIn( getZoomScale() );
+				dollyIn( getZoomScale( event.deltaY ) );
 
 			} else if ( dollyDelta.y < 0 ) {
 
-				dollyOut( getZoomScale() );
+				dollyOut( getZoomScale( event.deltaY ) );
 
 			}
 
@@ -502,11 +536,11 @@ module.exports = function( THREE ) {
 
 			if ( event.deltaY < 0 ) {
 
-				dollyOut( getZoomScale() );
+				dollyOut( getZoomScale( event.deltaY ) );
 
 			} else if ( event.deltaY > 0 ) {
 
-				dollyIn( getZoomScale() );
+				dollyIn( getZoomScale( event.deltaY ) );
 
 			}
 

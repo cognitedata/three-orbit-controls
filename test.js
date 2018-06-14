@@ -24,14 +24,15 @@ function start(gl, width, height) {
     // camera = new THREE.OrthographicCamera( 1 / - 2, 1 / 2, 1 / 2, 1 / - 2, 1, 1000 )
     // camera.position.set(0, 0, -1)
 
-    camera = new THREE.PerspectiveCamera(50, width/height, 1, 1000)
+    camera = new THREE.PerspectiveCamera(50, width/height, 0.001, 1000)
     camera.position.set(0, 1, -3)
     camera.lookAt(new THREE.Vector3())
 
     controls = new OrbitControls(camera)
+    controls.enableMinDistToTarget = true;
 
     var geo = new THREE.BoxGeometry(1,1,1)
-    var mat = new THREE.MeshBasicMaterial({ wireframe: true, color: 0xffffff })
+    var mat = new THREE.MeshBasicMaterial({ wireframe: true, color: 0xff5500, side: THREE.DoubleSide })
     var box = new THREE.Mesh(geo, mat)
     scene.add(box)
 }
